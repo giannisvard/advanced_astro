@@ -1,5 +1,6 @@
 from astro_constants import astro_constants as const
 from scipy.optimize import newton
+import numpy as np
 
 # Introduce dimensionless parameters
 
@@ -36,3 +37,7 @@ print('Classical L2 x-coordinate:', x_L2, 'AU')
 print('Classical L2 x-coordinate:', (x_L2 + mass_parameter) * length, 'm')
 
 # https://www.sciencedirect.com/science/article/pii/S0094576524001516?via%3Dihub
+
+def srp_acceleration(r, beta, mu, n):
+    a = beta * (1 - mu) / np.linalg.norm(r) ** 2 * (r @ n) ** 2 * n
+    return a
