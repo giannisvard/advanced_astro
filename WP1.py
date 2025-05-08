@@ -45,11 +45,11 @@ print('Classical L2 x-coordinate:', x_L2 * length, 'm')
 # https://www.sciencedirect.com/science/article/pii/S0094576524001516?via%3Dihub
 
 def srp_acceleration_dust(r, P, A, m, reflectivity):
-    a = (1 + reflectivity) * P * A / m * r
+    a = (1 + reflectivity) * P * A / m * r / np.linalg.norm(r)
     return a
 
 def srp_acceleration_dust_L2(r_dimensionless):
-    L = 382.8e24                        # https://nssdc.gsfc.nasa.gov/planetary/factsheet/sunfact.html
+    sfu_1AU = 1367                  # https://www.sciencedirect.com/topics/engineering/solar-radiation-pressure
     D = 10e-2
     A = np.pi * (D / 2) ** 2
     rho = 1.2e3
@@ -57,12 +57,11 @@ def srp_acceleration_dust_L2(r_dimensionless):
     m = V * rho
     refl = 0.5
     r_dimensional = r_dimensionless * length
-    P = L / (4 * np.pi * const.c * np.linalg.norm(r_dimensional) ** 2)
+    P = sfu_1AU * const.AU ** 2 / (const.c * np.linalg.norm(r_dimensional) ** 2)    # https://ntrs.nasa.gov/api/citations/20205005240/downloads/AAS_srpframeworkpaper_Final02.pdf#:~:text=Psrp%20%3D%20P0%20c%20%12,57%20%C3%97%2010%E2%88%926%20%12
     a_dimensional = srp_acceleration_dust(r_dimensional, P, A, m, refl)
     a_dimensionless = a_dimensional * time ** 2 / length
     return a_dimensionless
 
-print('srp acceleration:', srp_acceleration_dust_L2(np.array([1,0,0])))
 
 def potential_gradient(r):
     x = r[0]
