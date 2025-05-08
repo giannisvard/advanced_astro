@@ -12,3 +12,5 @@ class astro_constants:
     m_ryugu = 4.4820e+11
 
     a_ryugu = 1.1896 * AU
+
+    c = 299792458           # https://physics.nist.gov/cgi-bin/cuu/Value?c

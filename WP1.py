@@ -49,7 +49,7 @@ def srp_acceleration_dust(r, P, A, m, reflectivity):
     return a
 
 def srp_acceleration_dust_L2(r_dimensionless):
-    P = 382.8e24                        # https://nssdc.gsfc.nasa.gov/planetary/factsheet/sunfact.html
+    L = 382.8e24                        # https://nssdc.gsfc.nasa.gov/planetary/factsheet/sunfact.html
     D = 10e-2
     A = np.pi * (D / 2) ** 2
     rho = 1.2e3
@@ -57,19 +57,32 @@ def srp_acceleration_dust_L2(r_dimensionless):
     m = V * rho
     refl = 0.5
     r_dimensional = r_dimensionless * length
+    P = L / (4 * np.pi * const.c * np.linalg.norm(r_dimensional) ** 2)
     a_dimensional = srp_acceleration_dust(r_dimensional, P, A, m, refl)
     a_dimensionless = a_dimensional * time ** 2 / length
     return a_dimensionless
 
+print('srp acceleration:', srp_acceleration_dust_L2(np.array([1,0,0])))
 
-def potential(r):
-
+def potential_gradient(r):
+    x = r[0]
+    y = r[1]
+    z = r[2]
+    mu = mass_parameter
+    r1 = np.linalg.norm([x + mu, y, z])
+    r2 = np.linalg.norm([x - (1 - mu), y, z])
+    dUdx = x - (1 - mu) / r1 ** 3 * (x + mu) - mu / r2 ** 3 * (x - (1 - mu))
+    dUdy = y * (1 - (1 - mu) / r1 ** 3 - mu / r2 ** 3)
+    dUdz = z * ((1 - mu) / r1 ** 3 + mu / r2 ** 3)
+    DU = np.array([dUdx, dUdy, dUdz])
+    return DU
 
 def f_mu_Earth_Sun_srp(r):
-    f =
+    f = srp_acceleration_dust_L2(r) - potential_gradient(r)
+    return f
+
 r_L2_0 = np.array([1.01, 0, 0]) # Initial guess for L2, a bit further in the x-axis than Earth
 
-r_L2 = root(srp_acceleration_dust_L2, r_L2_0, tol=1e-10).x
+r_L2 = root(f_mu_Earth_Sun_srp, r_L2_0, tol=1e-10).x
 
 print('SRP L2 coordinate:', r_L2, 'AU')
-print('SRP L2 distance from the Sun:', (r_L2 + mass_parameter), 'AU')
