@@ -1,6 +1,7 @@
 from helper_functions import astro_constants as const
 from scipy.optimize import newton, root
 import numpy as np
+import matplotlib.pyplot as plt
 
 # Introduce dimensionless parameters
 
@@ -39,7 +40,8 @@ x_L2 = newton(f_mu_Earth_Sun, x_L2_0, fprime_mu_Earth_Sun, tol=1e-20, disp=True)
 
 print('Classical L2 x-coordinate:', x_L2, 'AU')
 print('Classical L2 x-coordinate:', x_L2 * length, 'm')
-print('Classical L2 x-coordinate wrt Sun:', (x_L2 + mu) * length, 'm')
+print('Classical L2 x-coordinate wrt Earth:', (x_L2 - (1 - mu)) * length, 'm')
+print('Classical L2 x-coordinate wrt Earth:', x_L2 - (1 - mu), 'AU')
 
 # Wakker p. 67
 # https://www.researchgate.net/publication/304609071_Earth-Moon_L1_libration_point_orbit_continuous_stationkeeping_control_using_time-varying_LQR_and_backstepping
@@ -126,10 +128,18 @@ print('SRP L1 x-coordinate wrt Sun (beta = 0.0363):', (r_L1 + mu) * length, 'm')
 
 diameter_increments = list(np.arange(1, 11) * 1e-2)
 
-r_L2_array = []
+r_L2_array_x = []
 
 for D in diameter_increments:
     wrapped_func_srp_L2 = lambda r: f_mu_Earth_Sun_srp(r, D)
     r_L2 = root(wrapped_func_srp_L2, r_L2_0, tol=1e-20).x
-    r_L2_array.append(r_L2)
+    r_L2_array_x.append(r_L2[0])
 
+# Plot
+plt.figure(figsize=(8, 5))
+plt.plot(diameter_increments, r_L2_array_x, marker='o')
+plt.xlabel('D (Diameter)')
+plt.ylabel('r_L2[1] (Second Element of r_L2)')
+plt.title('r_L2[1] vs Diameter')
+plt.grid(True)
+plt.show()
